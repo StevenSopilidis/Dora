@@ -1,25 +1,16 @@
 package main
 
 import (
-	"fmt"
-
-	"github.com/go-redis/redis"
+	v "github.com/stevensopilidis/dora/vault"
 )
 
 func main() {
-	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
+	vault := v.InitializeVault(&v.InitializeVaultConfig{
+		Host: "localhost",
+		Port: 5432,
+		Db:   "doradb",
+		User: "dora",
+		Pass: "dora123",
 	})
-
-	err := client.Set("id1234", "json", 0).Err()
-	if err != nil {
-		fmt.Println(err)
-	}
-	val, err := client.Get("id1234").Result()
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(val)
+	defer v.CloseVault(vault)
 }

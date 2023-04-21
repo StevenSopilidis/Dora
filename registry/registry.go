@@ -1,8 +1,11 @@
 package registry
 
-import "context"
+import (
+	"context"
+)
 
 type Service struct {
+	// gorm.Model
 	Addr string
 	Port uint16
 }
