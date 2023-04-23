@@ -60,6 +60,16 @@ func (v *Vault) RemoveService(ctx context.Context, id uint) error {
 	return nil
 }
 
+func (v *Vault) UpdateService(ctx context.Context, service *m.ServiceModel) error {
+	ctx, cancel := context.WithTimeout(ctx, maxDbOperationWaitingTime)
+	defer cancel()
+	result := v.db.Save(service)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
 func InitializeVault(config *InitializeVaultConfig) *Vault {
 	// first create the database
 	dsn := fmt.Sprintf("host=%s user=%s password=%s port=%d sslmode=disable ", config.Host, config.User, config.Pass, config.Port)

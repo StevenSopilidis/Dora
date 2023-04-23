@@ -39,11 +39,26 @@ func TestVault(t *testing.T) {
 		"get all entries from vault":      testGetFromVault,
 		"remove entrie from vault":        testRemoveEntryFromVault,
 		"remove invalid entry from vault": testRemoveInvalidEntryFromVault,
+		"update entry from vault":         testUpdateEntryFromVault,
 	} {
 		t.Run(scenario, func(t *testing.T) {
 			fn(t, v)
 		})
 	}
+}
+
+func testUpdateEntryFromVault(t *testing.T, v *Vault) {
+	service := &m.ServiceModel{
+		Service: registry.Service{
+			Addr: "127.0.0.1",
+			Port: 80,
+		},
+	}
+	err := v.AddService(context.Background(), service)
+	require.NoError(t, err)
+	service.Addr = "192.168.1.1"
+	err = v.UpdateService(context.Background(), service)
+	require.NoError(t, err)
 }
 
 func testAppendToVault(t *testing.T, v *Vault) {

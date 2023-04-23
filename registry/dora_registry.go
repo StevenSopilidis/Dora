@@ -3,8 +3,10 @@ package registry
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 
 	"github.com/go-redis/redis"
+	e "github.com/stevensopilidis/dora/registry/errors"
 )
 
 const (
@@ -33,6 +35,9 @@ func (r *RedisRegistryClient) Remove(ctx context.Context, name string) error {
 	ctx, cancel := context.WithTimeout(ctx, maxOperatingWaitTime)
 	defer cancel()
 	err := r.client.WithContext(ctx).Del(name).Err()
+	if err == redis.Nil {
+		return &e.ServiceNotFoundError{}
+	}
 	if err != nil {
 		return err
 	}
@@ -43,6 +48,9 @@ func (r *RedisRegistryClient) Get(ctx context.Context, name string) (error, Serv
 	ctx, cancel := context.WithTimeout(ctx, maxOperatingWaitTime)
 	defer cancel()
 	val, err := r.client.WithContext(ctx).Get(name).Result()
+	if err == redis.Nil {
+		return &e.ServiceNotFoundError{}, Service{}
+	}
 	if err != nil {
 		return err, Service{}
 	}
@@ -52,4 +60,25 @@ func (r *RedisRegistryClient) Get(ctx context.Context, name string) (error, Serv
 		return err, Service{}
 	}
 	return nil, service
+}
+
+func (r *RedisRegistryClient) CheckHealth(service string) error {
+	ch := make(chan error)
+	go func() {
+		defer close(ch)
+		err, service := r.Get(context.Background(), service)
+		if err != nil {
+			ch <- &e.ServiceNotFoundError{}
+			return
+		}
+
+		_, err = http.Get(service.HealthCheckUrl)
+		if err != nil {
+			ch <- &e.ServiceUnhealthyError{}
+			return
+		}
+		ch <- nil
+	}()
+	err := <-ch
+	return err
 }
