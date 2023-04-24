@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-redis/redis"
-	e "github.com/stevensopilidis/dora/registry/errors"
+	e "github.com/stevensopilidis/dora/errors"
 )
 
 const (
@@ -62,23 +62,14 @@ func (r *RedisRegistryClient) Get(ctx context.Context, name string) (error, Serv
 	return nil, service
 }
 
-func (r *RedisRegistryClient) CheckHealth(service string) error {
-	ch := make(chan error)
-	go func() {
-		defer close(ch)
-		err, service := r.Get(context.Background(), service)
-		if err != nil {
-			ch <- &e.ServiceNotFoundError{}
-			return
-		}
-
-		_, err = http.Get(service.HealthCheckUrl)
-		if err != nil {
-			ch <- &e.ServiceUnhealthyError{}
-			return
-		}
-		ch <- nil
-	}()
-	err := <-ch
+func (r *RedisRegistryClient) CheckHealth(name string) error {
+	err, service := r.Get(context.Background(), name)
+	if err != nil {
+		return &e.ServiceNotFoundError{}
+	}
+	_, err = http.Get(service.HealthCheckUrl)
+	if err != nil {
+		return &e.ServiceUnhealthyError{}
+	}
 	return err
 }

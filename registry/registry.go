@@ -36,10 +36,10 @@ type Registry interface {
 	// function that will check the health of the service
 	// by making a request to the service itself
 	// if its not alive it will Set it as not alive
-	// @param service: service to check
+	// @param name: service to check
 	// retutns ServiceNotFoundError if service is not found
 	// of if service its not health it will return
 	// ServiceNotHealthy soif it ServiceNotHealthy is returned
 	// we can set the service in the db
-	CheckHealth(service string) (error, bool)
+	CheckHealth(name string) (error, bool)
 }

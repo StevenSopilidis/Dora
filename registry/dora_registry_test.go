@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/go-redis/redis"
+	e "github.com/stevensopilidis/dora/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -85,5 +86,5 @@ func testRemove(t *testing.T, r *RedisRegistryClient) {
 	require.NoError(t, err)
 	// redis.Nil error gets returned when key not valid
 	err, _ = r.Get(context.Background(), service_name)
-	require.Equal(t, err, redis.Nil)
+	require.Equal(t, err, &e.ServiceNotFoundError{})
 }
