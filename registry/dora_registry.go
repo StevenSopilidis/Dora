@@ -3,6 +3,7 @@ package registry
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/go-redis/redis"
@@ -17,7 +18,21 @@ type RedisRegistryClient struct {
 	client *redis.Client
 }
 
-func CreateRedisRegistryClient(opts *redis.Options) *RedisRegistryClient {
+var registry *RedisRegistryClient = nil
+
+func InitRegistry(opts *redis.Options) {
+	registry = createRedisRegistryClient(opts)
+}
+
+func GetRedisRegistryClient() *RedisRegistryClient {
+	if registry == nil {
+		log.Panic("Registry was not initialized")
+		return nil
+	}
+	return registry
+}
+
+func createRedisRegistryClient(opts *redis.Options) *RedisRegistryClient {
 	return &RedisRegistryClient{
 		client: redis.NewClient(opts),
 	}
