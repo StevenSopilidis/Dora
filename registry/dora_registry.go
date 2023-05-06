@@ -17,6 +17,12 @@ type RedisRegistryClient struct {
 	client *redis.Client
 }
 
+func CreateRedisRegistryClient(opts *redis.Options) *RedisRegistryClient {
+	return &RedisRegistryClient{
+		client: redis.NewClient(opts),
+	}
+}
+
 func (r *RedisRegistryClient) Append(ctx context.Context, name string, service Service) error {
 	ctx, cancel := context.WithTimeout(ctx, maxOperatingWaitTime)
 	defer cancel()

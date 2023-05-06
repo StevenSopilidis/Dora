@@ -1,16 +1,17 @@
 package main
 
 import (
-	v "github.com/stevensopilidis/dora/vault"
+	"github.com/go-redis/redis"
+	r "github.com/stevensopilidis/dora/registry"
+	s "github.com/stevensopilidis/dora/server"
 )
 
 func main() {
-	vault := v.InitializeVault(&v.InitializeVaultConfig{
-		Host: "localhost",
-		Port: 5432,
-		Db:   "doradb",
-		User: "dora",
-		Pass: "dora123",
+	r.CreateRedisRegistryClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+		PoolSize: 200,
 	})
-	defer v.CloseVault(vault)
+	s.InitServer()
 }

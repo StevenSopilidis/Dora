@@ -15,16 +15,13 @@ func setUpTest(t *testing.T) (
 ) {
 	t.Helper()
 
-	redisClient := redis.NewClient(&redis.Options{
+	client = CreateRedisRegistryClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
 	})
-	client = &RedisRegistryClient{
-		client: redisClient,
-	}
 	teardown = func() {
-		redisClient.Close()
+		client.client.Close()
 	}
 	_, err := client.client.Ping().Result()
 	if err != nil {
